@@ -161,7 +161,7 @@ def main_menu():
             text_quit = text_format("QUIT", constantes.font, 75, constantes.black)
         title_rect = title.get_rect()
         start_rect = text_start.get_rect()
-        quit_rect = text_quit.get_rect()
+        quit_rect = text_quit.get_rect() ####
         screen.blit(title, (constantes.SCREEN_WIDTH / 2 - (title_rect[2] / 2), 80))
         screen.blit(text_start, (constantes.SCREEN_WIDTH / 2 - (start_rect[2] / 2), 300))
         screen.blit(text_quit, (constantes.SCREEN_WIDTH / 2 - (quit_rect[2] / 2), 360))
