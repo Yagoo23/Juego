@@ -1,12 +1,15 @@
 import pygame
 import constantes
 import random
-from juego import Juego
+# from juego import Juego
+#
+# j=Juego()
+# while j.running:
+#     j.playing=True
+#     j.loop_juego()
 
-j=Juego()
-while j.running:
-    j.playing=True
-    j.loop_juego()
+############### MINUTO 10:00
+###############  https://www.youtube.com/watch?v=Ls7ZzqqPO3A
 
 
 pygame.init()
@@ -27,8 +30,12 @@ Variables del juego
 """
 Otras variables
 """
+SCROLL_TECHO=200
 gravedad = 1
-Max_Platforms = 10
+Max_Platforms = 50
+WHITE=(255,255,255)
+scroll=0
+fondo_scroll=0
 """
 Cargar la imagen de fondo
 """
@@ -37,11 +44,16 @@ personajeDe_img = pygame.image.load('img/quieto.png').convert_alpha()
 platform_img = pygame.image.load('img/platform.png').convert_alpha()
 
 
-def text_format(message, textFont, textSize, textColor):
-    newFont = pygame.font.Font(textFont, textSize)
-    newText = newFont.render(message, 0, textColor)
+# def text_format(message, textFont, textSize, textColor):
+#     newFont = pygame.font.Font(textFont, textSize)
+#     newText = newFont.render(message, 0, textColor)
+#
+#     return newText
 
-    return newText
+def dibujar_fondo(fondo_scroll):
+    # hace aparecer el fondo
+    screen.blit(fondo, (0, 0+fondo_scroll))
+    screen.blit(fondo, (0, -900 + fondo_scroll))
 
 
 class Jugador():
@@ -55,6 +67,7 @@ class Jugador():
         self.flip = False
 
     def movimiento(self):
+        scroll=0
         dx = 0
         dy = 0
         tecla = pygame.key.get_pressed()
@@ -90,8 +103,17 @@ class Jugador():
         if self.rect.bottom + dy > constantes.SCREEN_HEIGHT:
             dy = 0
             self.vel_y = -20
+
+        #comprobar si el jugador toca el techo de la pantalla
+        if self.rect.top <= SCROLL_TECHO:
+            #si el jugador está saltando
+            if self.vel_y < 0:
+                scroll = -dy
+
         self.rect.x += dx
-        self.rect.y += dy
+        self.rect.y += dy + scroll
+
+        return scroll
 
     def dibujar(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 20, self.rect.y - 25))
@@ -109,6 +131,11 @@ class Platform(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+    def update(self,scroll):
+        #actualizar las posición vetical de las plataformas
+        self.rect.y += scroll
+
+
 
 # Instancia de jugador
 jumpy = Jugador(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
@@ -117,12 +144,19 @@ jumpy = Jugador(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
 platform_grupo = pygame.sprite.Group()
 
 # crear plataformas temporales
-for p in range(Max_Platforms):
-    platform_width = random.randint(60, 90)
-    platform_x = random.randint(0, constantes.SCREEN_WIDTH - platform_width)
-    platform_y = p * random.randint(90, 120)
-    platform = Platform(platform_x, platform_y, platform_width)
-    platform_grupo.add(platform)
+# for p in range(Max_Platforms):
+#     platform_width = random.randint(60, 90)
+#     platform_x = random.randint(15, constantes.SCREEN_WIDTH - platform_width)
+#     platform_y = p * random.randint(80, 120) - 700
+#     platform = Platform(platform_x, platform_y, platform_width)
+#     platform_grupo.add(platform)
+
+
+#crear plataforma de inicio
+platform=Platform(constantes.SCREEN_WIDTH//2 - 50,constantes.SCREEN_HEIGHT - 50,100)
+platform_grupo.add(platform)
+
+
 
 """ 
     el bucle principal del juego
@@ -133,16 +167,30 @@ for p in range(Max_Platforms):
 
 while True:
     reloj.tick(FPS)
-    jumpy.movimiento()
-    # hace aparecer el fondo
-    screen.blit(fondo, (0, 0))
+    scroll=jumpy.movimiento()
+    fondo_scroll += scroll
+    if fondo_scroll >=900:
+        fondo_scroll = 0
+    dibujar_fondo(fondo_scroll)
+
+    #generar plataformas
+    if len(platform_grupo) < Max_Platforms:
+        p_w=random.randint(60,90)
+        p_x=random.randint(0,constantes.SCREEN_WIDTH - p_w)
+        p_y=platform.rect.y - random.randint(80,120)
+        platform=Platform(p_x ,p_y,p_w)
+        platform_grupo.add(platform)
+
+
+    #actualizar plataformas
+    platform_grupo.update(scroll)
     # dibuja
     platform_grupo.draw(screen)
     jumpy.dibujar()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-    #         quit()
+            quit()
     #     if event.type == pygame.KEYDOWN:
     #         if event.key == pygame.K_UP:
     #             selected = "start"
