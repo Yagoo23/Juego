@@ -8,9 +8,8 @@ import random
 #     j.playing=True
 #     j.loop_juego()
 
-############### MINUTO 10:00
-###############  https://www.youtube.com/watch?v=Ls7ZzqqPO3A
-
+### EMPEZAR
+### https://www.youtube.com/watch?v=DCqV1ARz-Yw
 
 pygame.init()
 """ 
@@ -26,16 +25,19 @@ FPS = 60
 """
 Variables del juego
 """
-
-"""
-Otras variables
-"""
 SCROLL_TECHO=200
 gravedad = 1
 Max_Platforms = 50
-WHITE=(255,255,255)
 scroll=0
 fondo_scroll=0
+game_over=False
+score=0
+fade_counter=0
+"""
+Definir fuente
+"""
+font_pequeña=pygame.font.SysFont('Retro.ttf',20)
+font_grande=pygame.font.SysFont('Retro.ttf',34)
 """
 Cargar la imagen de fondo
 """
@@ -49,6 +51,11 @@ platform_img = pygame.image.load('img/platform.png').convert_alpha()
 #     newText = newFont.render(message, 0, textColor)
 #
 #     return newText
+
+#función para poner texto en la pantalla
+def draw_text(text,font,text_col,x,y):
+    img=font.render(text,True,text_col)
+    screen.blit(img,(x,y))
 
 def dibujar_fondo(fondo_scroll):
     # hace aparecer el fondo
@@ -100,9 +107,9 @@ class Jugador():
                         self.vel_y = -20
 
         # comprobar la colisión con el suelo
-        if self.rect.bottom + dy > constantes.SCREEN_HEIGHT:
-            dy = 0
-            self.vel_y = -20
+        # if self.rect.bottom + dy > constantes.SCREEN_HEIGHT:
+        #     dy = 0
+        #     self.vel_y = -20
 
         #comprobar si el jugador toca el techo de la pantalla
         if self.rect.top <= SCROLL_TECHO:
@@ -134,6 +141,10 @@ class Platform(pygame.sprite.Sprite):
     def update(self,scroll):
         #actualizar las posición vetical de las plataformas
         self.rect.y += scroll
+
+        #comprobar si la plataforma sale de la pantalla
+        if self.rect.top > constantes.SCREEN_HEIGHT:
+            self.kill()
 
 
 
@@ -167,26 +178,53 @@ platform_grupo.add(platform)
 
 while True:
     reloj.tick(FPS)
-    scroll=jumpy.movimiento()
-    fondo_scroll += scroll
-    if fondo_scroll >=900:
-        fondo_scroll = 0
-    dibujar_fondo(fondo_scroll)
+    if game_over==False:
+        scroll = jumpy.movimiento()
+        fondo_scroll += scroll
+        if fondo_scroll >= 900:
+            fondo_scroll = 0
+        dibujar_fondo(fondo_scroll)
 
-    #generar plataformas
-    if len(platform_grupo) < Max_Platforms:
-        p_w=random.randint(60,90)
-        p_x=random.randint(0,constantes.SCREEN_WIDTH - p_w)
-        p_y=platform.rect.y - random.randint(80,120)
-        platform=Platform(p_x ,p_y,p_w)
-        platform_grupo.add(platform)
+    # generar plataformas
+        if len(platform_grupo) < Max_Platforms:
+            p_w = random.randint(60, 90)
+            p_x = random.randint(10, constantes.SCREEN_WIDTH - p_w)
+            p_y = platform.rect.y - random.randint(80, 120)
+            platform = Platform(p_x, p_y, p_w)
+            platform_grupo.add(platform)
 
-
-    #actualizar plataformas
-    platform_grupo.update(scroll)
+    # actualizar plataformas
+        platform_grupo.update(scroll)
     # dibuja
-    platform_grupo.draw(screen)
-    jumpy.dibujar()
+        platform_grupo.draw(screen)
+        jumpy.dibujar()
+
+    #comprobar game over
+        if jumpy.rect.top > constantes.SCREEN_HEIGHT:
+            game_over=True
+    else:
+        if fade_counter < constantes.SCREEN_WIDTH:
+            fade_counter += 5
+            for y in range(0,12,2):
+                pygame.draw.rect(screen, constantes.black, (0, y * 100, fade_counter, 100))
+                pygame.draw.rect(screen, constantes.black, (constantes.SCREEN_WIDTH - fade_counter, (y + 1) * 100, constantes.SCREEN_WIDTH, 100))
+        draw_text('GAME OVER',font_grande,constantes.blue,210,350)
+        draw_text('SCORE: '+str(score),font_grande,constantes.blue,220,400)
+        draw_text('PRESS SPACE TO PLAY AGAIN',font_grande,constantes.blue,120,450)
+        key=pygame.key.get_pressed()
+        if key[pygame.K_SPACE]:
+            #resetea variables
+            game_over=False
+            score=0
+            scroll=0
+            fade_counter=0
+            #reposicionar jumpy
+            jumpy.rect.center =(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
+            #resetear plataformas
+            platform_grupo.empty()
+            platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100)
+            platform_grupo.add(platform)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -204,11 +242,11 @@ while True:
     # screen.fill(constantes.blue)
     # title = text_format("Saltos", constantes.font, 90, constantes.yellow)
     # if selected == "start":
-    #     text_start = text_format("START", constantes.font, 75, constantes.white)
+    #     text_start = text_format("START", constantes.font, 75, constantes.black)
     # else:
     #     text_start = text_format("START", constantes.font, 75, constantes.black)
     # if selected == "quit":
-    #     text_quit = text_format("QUIT", constantes.font, 75, constantes.white)
+    #     text_quit = text_format("QUIT", constantes.font, 75, constantes.black)
     # else:
     #     text_quit = text_format("QUIT", constantes.font, 75, constantes.black)
     # title_rect = title.get_rect()

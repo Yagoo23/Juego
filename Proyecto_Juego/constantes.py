@@ -2,7 +2,7 @@
 Tamaño Ventana
 """
 
-SCREEN_WIDTH = 600
+SCREEN_WIDTH = 550
 SCREEN_HEIGHT = 900
 white=(255, 255, 255)
 black = (0, 0, 0)
