@@ -1,6 +1,8 @@
 import pygame
 import constantes
 import random
+import os
+
 # from juego import Juego
 #
 # j=Juego()
@@ -8,8 +10,6 @@ import random
 #     j.playing=True
 #     j.loop_juego()
 
-### EMPEZAR
-### https://www.youtube.com/watch?v=DCqV1ARz-Yw
 
 pygame.init()
 """ 
@@ -27,12 +27,20 @@ Variables del juego
 """
 SCROLL_TECHO=200
 gravedad = 1
-Max_Platforms = 50
+Max_Platforms = 12
 scroll=0
 fondo_scroll=0
 game_over=False
 score=0
 fade_counter=0
+
+if os.path.exists('score.txt'):
+    with open('score.txt','r') as file:
+        high_score=int(file.read())
+else:
+    high_score=0
+#high_score=0
+
 """
 Definir fuente
 """
@@ -57,8 +65,14 @@ def draw_text(text,font,text_col,x,y):
     img=font.render(text,True,text_col)
     screen.blit(img,(x,y))
 
+#función para dibujar información en el panel
+def dibujar_panel():
+    pygame.draw.rect(screen,constantes.green,(0,0,constantes.SCREEN_WIDTH,30))
+    pygame.draw.line(screen,constantes.green,(0,30),(constantes.SCREEN_WIDTH,30),2)
+    draw_text('SCORE: '+str(score),font_pequeña,constantes.white,0,0)
+
 def dibujar_fondo(fondo_scroll):
-    # hace aparecer el fondo
+    # función para hacer aparecer el fondo
     screen.blit(fondo, (0, 0+fondo_scroll))
     screen.blit(fondo, (0, -900 + fondo_scroll))
 
@@ -188,16 +202,27 @@ while True:
     # generar plataformas
         if len(platform_grupo) < Max_Platforms:
             p_w = random.randint(60, 90)
-            p_x = random.randint(10, constantes.SCREEN_WIDTH - p_w)
-            p_y = platform.rect.y - random.randint(80, 120)
+            p_x = random.randint(5, constantes.SCREEN_WIDTH - p_w)
+            p_y = platform.rect.y - random.randint(60, 100)
             platform = Platform(p_x, p_y, p_w)
             platform_grupo.add(platform)
 
     # actualizar plataformas
         platform_grupo.update(scroll)
+
+    #actualizar puntuación
+        if scroll > 0:
+            score +=scroll
+
+        #dibujar la línea con la puntuación máxima previa
+        pygame.draw.line(screen,constantes.black,(0,score - high_score + SCROLL_TECHO), (constantes.SCREEN_WIDTH,score - high_score + SCROLL_TECHO),3)
+        draw_text('HIGH SCORE',font_pequeña,constantes.black,constantes.SCREEN_WIDTH - 90,score - high_score + SCROLL_TECHO)
     # dibuja
         platform_grupo.draw(screen)
         jumpy.dibujar()
+
+        #dibujar el panel
+        dibujar_panel()
 
     #comprobar game over
         if jumpy.rect.top > constantes.SCREEN_HEIGHT:
@@ -208,27 +233,39 @@ while True:
             for y in range(0,12,2):
                 pygame.draw.rect(screen, constantes.black, (0, y * 100, fade_counter, 100))
                 pygame.draw.rect(screen, constantes.black, (constantes.SCREEN_WIDTH - fade_counter, (y + 1) * 100, constantes.SCREEN_WIDTH, 100))
-        draw_text('GAME OVER',font_grande,constantes.blue,210,350)
-        draw_text('SCORE: '+str(score),font_grande,constantes.blue,220,400)
-        draw_text('PRESS SPACE TO PLAY AGAIN',font_grande,constantes.blue,120,450)
-        key=pygame.key.get_pressed()
-        if key[pygame.K_SPACE]:
-            #resetea variables
-            game_over=False
-            score=0
-            scroll=0
-            fade_counter=0
-            #reposicionar jumpy
-            jumpy.rect.center =(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
-            #resetear plataformas
-            platform_grupo.empty()
-            platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100)
-            platform_grupo.add(platform)
+        else:
+            draw_text('GAME OVER', font_grande, constantes.blue, 210, 350)
+            draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 220, 400)
+            draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 120, 450)
+            # actualizar high score
+            if score > high_score:
+                high_score = score
+                with open('score.txt', 'w') as file:
+                    file.write(str(high_score))
+            key = pygame.key.get_pressed()
+            if key[pygame.K_SPACE]:
+                # resetea variables
+                game_over = False
+                score = 0
+                scroll = 0
+                fade_counter = 0
+                # reposicionar jumpy
+                jumpy.rect.center = (constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
+                # resetear plataformas
+                platform_grupo.empty()
+                platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100)
+                platform_grupo.add(platform)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
+            #actualizar puntuación máxima
+            if score > high_score:
+                high_score = score
+                with open('score.txt','w') as file:
+                    file.write(str(high_score))
             quit()
+
     #     if event.type == pygame.KEYDOWN:
     #         if event.key == pygame.K_UP:
     #             selected = "start"
