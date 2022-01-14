@@ -2,6 +2,8 @@ import pygame
 import constantes
 import random
 import os
+from getpass import getuser
+from datetime import datetime
 
 # from juego import Juego
 #
@@ -36,7 +38,7 @@ fade_counter=0
 
 if os.path.exists('score.txt'):
     with open('score.txt','r') as file:
-        high_score=int(file.read())
+        high_score=int(file.seek(1))
 else:
     high_score=0
 #high_score=0
@@ -241,7 +243,13 @@ while True:
             if score > high_score:
                 high_score = score
                 with open('score.txt', 'w') as file:
-                    file.write(str(high_score))
+                    mensaje=mensaje="Nuevo record: "
+                    mensaje = "Nuevo record: "
+                    usuario = getuser()
+                    espacio = ". Usario: "
+                    now=datetime.now()
+                    momento = now.strftime("%d/%m/%Y, %H:%M:%S")
+                    file.write(mensaje + str(high_score) + espacio + usuario+". Hora y dia: "+str(momento))
             key = pygame.key.get_pressed()
             if key[pygame.K_SPACE]:
                 # resetea variables
@@ -263,7 +271,12 @@ while True:
             if score > high_score:
                 high_score = score
                 with open('score.txt','w') as file:
-                    file.write(str(high_score))
+                    mensaje="Nuevo record: "
+                    usuario=getuser()
+                    espacio=". Usario: "
+                    now=datetime.now()
+                    momento = now.strftime("%d/%m/%Y, %H:%M:%S")
+                    file.write(mensaje+str(high_score)+espacio+usuario+". Hora y dia: "+str(momento))
             quit()
 
     #     if event.type == pygame.KEYDOWN:
