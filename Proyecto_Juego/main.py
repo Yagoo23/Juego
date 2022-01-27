@@ -12,6 +12,7 @@ from datetime import datetime
 #     j.playing=True
 #     j.loop_juego()
 
+# https://www.youtube.com/watch?v=EY0bxfISQNc&list=PLjcN1EyupaQlBSrfP4_9SdpJIcfnSJgzL&index=11 minuto 4:44
 
 pygame.init()
 """ 
@@ -147,14 +148,22 @@ class Jugador():
 
 # Clase para la plataforma
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width):
+    def __init__(self, x, y, width,movimientoPlat):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(platform_img, (width, 30))
+        self.moving=movimientoPlat
+        self.mov_contador=random.randint(0,50)
+        self.direccion=random.choice([-1,1])
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
     def update(self,scroll):
+        #moviendo las plataformas de lado a lado si son plataformas móviles
+
+        if self.moving == True:
+            self.rect.x +=self.direccion
+
         #actualizar las posición vetical de las plataformas
         self.rect.y += scroll
 
@@ -180,7 +189,7 @@ platform_grupo = pygame.sprite.Group()
 
 
 #crear plataforma de inicio
-platform=Platform(constantes.SCREEN_WIDTH//2 - 50,constantes.SCREEN_HEIGHT - 50,100)
+platform=Platform(constantes.SCREEN_WIDTH//2 - 50,constantes.SCREEN_HEIGHT - 50,100,False)
 platform_grupo.add(platform)
 
 
@@ -206,7 +215,12 @@ while True:
             p_w = random.randint(60, 90)
             p_x = random.randint(5, constantes.SCREEN_WIDTH - p_w)
             p_y = platform.rect.y - random.randint(60, 100)
-            platform = Platform(p_x, p_y, p_w)
+            p_tipo=random.randint(1,2)
+            if p_tipo == 1:
+                p_mover = True
+            else:
+                p_mover = False
+            platform = Platform(p_x, p_y, p_w,p_mover)
             platform_grupo.add(platform)
 
     # actualizar plataformas
