@@ -4,6 +4,8 @@ import random
 import os
 from getpass import getuser
 from datetime import datetime
+from ajustes_imagen import ajustes_imagen
+from enemigo import Enemigo
 
 # from juego import Juego
 #
@@ -12,7 +14,7 @@ from datetime import datetime
 #     j.playing=True
 #     j.loop_juego()
 
-# https://www.youtube.com/watch?v=EY0bxfISQNc&list=PLjcN1EyupaQlBSrfP4_9SdpJIcfnSJgzL&index=11 minuto 4:44
+# https://www.youtube.com/watch?v=ZpcQ_W-1vxQ&list=PLjcN1EyupaQlBSrfP4_9SdpJIcfnSJgzL&index=13 minuto 8:26 y buscar imagen
 
 pygame.init()
 """ 
@@ -55,6 +57,8 @@ Cargar la imagen de fondo
 fondo = pygame.image.load('img/fondo2.jpg').convert_alpha()
 personajeDe_img = pygame.image.load('img/quieto.png').convert_alpha()
 platform_img = pygame.image.load('img/platform.png').convert_alpha()
+helicoptero=pygame.image.load('img/helicoptero.png').convert_alpha()
+avion_aj=ajustes_imagen(helicoptero)
 
 
 # def text_format(message, textFont, textSize, textColor):
@@ -154,16 +158,21 @@ class Platform(pygame.sprite.Sprite):
         self.moving=movimientoPlat
         self.mov_contador=random.randint(0,50)
         self.direccion=random.choice([-1,1])
+        self.velocidad=random.randint(1,2)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
     def update(self,scroll):
         #moviendo las plataformas de lado a lado si son plataformas móviles
-
         if self.moving == True:
-            self.rect.x +=self.direccion
+            self.mov_contador +=1
+            self.rect.x += self.direccion * self.velocidad
 
+        #cambiar la dirección de la plataforma o golpea una pared
+        if self.mov_contador >=100 or self.rect.left <0 or self.rect.right > constantes.SCREEN_WIDTH:
+            self.direccion *= -1
+            self.mov_contador= 0
         #actualizar las posición vetical de las plataformas
         self.rect.y += scroll
 
@@ -178,6 +187,7 @@ jumpy = Jugador(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
 
 # crear grupos de plataformas
 platform_grupo = pygame.sprite.Group()
+enemigo_grupo = pygame.sprite.Group()
 
 # crear plataformas temporales
 # for p in range(Max_Platforms):
@@ -216,7 +226,7 @@ while True:
             p_x = random.randint(5, constantes.SCREEN_WIDTH - p_w)
             p_y = platform.rect.y - random.randint(60, 100)
             p_tipo=random.randint(1,2)
-            if p_tipo == 1:
+            if p_tipo == 1 and score > 5000:
                 p_mover = True
             else:
                 p_mover = False
@@ -225,6 +235,12 @@ while True:
 
     # actualizar plataformas
         platform_grupo.update(scroll)
+
+    #generar enemigos
+        if len(enemigo_grupo) == 0:
+            enemigo = Enemigo(constantes.SCREEN_WIDTH,100,avion_aj,1.5)
+            enemigo_grupo.add(enemigo)
+
 
     #actualizar puntuación
         if scroll > 0:
@@ -235,6 +251,7 @@ while True:
         draw_text('HIGH SCORE',font_pequeña,constantes.black,constantes.SCREEN_WIDTH - 90,score - high_score + SCROLL_TECHO)
     # dibuja
         platform_grupo.draw(screen)
+        enemigo_grupo.draw(screen)
         jumpy.dibujar()
 
         #dibujar el panel
@@ -275,7 +292,7 @@ while True:
                 jumpy.rect.center = (constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
                 # resetear plataformas
                 platform_grupo.empty()
-                platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100)
+                platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100,False)
                 platform_grupo.add(platform)
 
     for event in pygame.event.get():
