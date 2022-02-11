@@ -2,8 +2,8 @@
 Tamaño Ventana
 """
 
-SCREEN_WIDTH = 550
-SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 500
+SCREEN_HEIGHT = 800
 white=(255, 255, 255)
 black = (0, 0, 0)
 gray = (50, 50, 50)

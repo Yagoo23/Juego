@@ -57,8 +57,8 @@ Cargar la imagen de fondo
 fondo = pygame.image.load('img/fondo2.jpg').convert_alpha()
 personajeDe_img = pygame.image.load('img/quieto.png').convert_alpha()
 platform_img = pygame.image.load('img/platform.png').convert_alpha()
-helicoptero=pygame.image.load('img/helicoptero.png').convert_alpha()
-avion_aj=ajustes_imagen(helicoptero)
+avion=pygame.image.load('img/plane.png').convert_alpha()
+avion_aj=ajustes_imagen(avion)
 
 
 # def text_format(message, textFont, textSize, textColor):
