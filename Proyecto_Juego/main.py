@@ -30,7 +30,7 @@ FPS = 60
 """
 Variables del juego
 """
-SCROLL_TECHO=200
+SCROLL_TECHO=470
 gravedad = 1
 Max_Platforms = 12
 scroll=0
@@ -57,7 +57,7 @@ Cargar la imagen de fondo
 fondo = pygame.image.load('img/fondo2.jpg').convert_alpha()
 personajeDe_img = pygame.image.load('img/quieto.png').convert_alpha()
 platform_img = pygame.image.load('img/platform.png').convert_alpha()
-avion=pygame.image.load('img/plane.png').convert_alpha()
+avion=pygame.image.load('img/bird.png').convert_alpha()
 avion_aj=ajustes_imagen(avion)
 
 
@@ -141,6 +141,9 @@ class Jugador():
         self.rect.x += dx
         self.rect.y += dy + scroll
 
+        #update mask
+        self.mask=pygame.mask.from_surface(self.image)
+
         return scroll
 
     def dibujar(self):
@@ -183,7 +186,7 @@ class Platform(pygame.sprite.Sprite):
 
 
 # Instancia de jugador
-jumpy = Jugador(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
+jumpy = Jugador(constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 200)
 
 # crear grupos de plataformas
 platform_grupo = pygame.sprite.Group()
@@ -237,10 +240,11 @@ while True:
         platform_grupo.update(scroll)
 
     #generar enemigos
-        if len(enemigo_grupo) == 0:
+        if len(enemigo_grupo) == 0 and score > 2000:
             enemigo = Enemigo(constantes.SCREEN_WIDTH,100,avion_aj,1.5)
             enemigo_grupo.add(enemigo)
-
+    #update enemigos
+        enemigo_grupo.update(scroll,constantes.SCREEN_WIDTH)
 
     #actualizar puntuación
         if scroll > 0:
@@ -260,6 +264,10 @@ while True:
     #comprobar game over
         if jumpy.rect.top > constantes.SCREEN_HEIGHT:
             game_over=True
+    #comprobar la colisión con enemigos
+        if pygame.sprite.spritecollide(jumpy,enemigo_grupo,False):
+            if pygame.sprite.spritecollide(jumpy,enemigo_grupo,False,pygame.sprite.collide_mask):
+                game_over = True
     else:
         if fade_counter < constantes.SCREEN_WIDTH:
             fade_counter += 5
@@ -292,6 +300,8 @@ while True:
                 jumpy.rect.center = (constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
                 # resetear plataformas
                 platform_grupo.empty()
+                #resetear enemigos
+                enemigo_grupo.empty()
                 platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100,False)
                 platform_grupo.add(platform)
 
