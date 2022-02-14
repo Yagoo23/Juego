@@ -14,7 +14,7 @@ from enemigo import Enemigo
 #     j.playing=True
 #     j.loop_juego()
 
-# https://www.youtube.com/watch?v=ZpcQ_W-1vxQ&list=PLjcN1EyupaQlBSrfP4_9SdpJIcfnSJgzL&index=13 minuto 8:26 y buscar imagen
+# https://www.youtube.com/watch?v=5RK-9gCleV8&list=PLjcN1EyupaQlBSrfP4_9SdpJIcfnSJgzL&index=14 empezar
 
 pygame.init()
 """ 
