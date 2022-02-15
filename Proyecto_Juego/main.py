@@ -321,9 +321,10 @@ while True:
                                  (constantes.SCREEN_WIDTH - fade_counter, (y + 1) * 100, constantes.SCREEN_WIDTH,
                                   100))
         else:
-            draw_text('GAME OVER', font_grande, constantes.blue, 210, 350)
-            draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 220, 400)
-            draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 120, 450)
+            draw_text('GAME OVER', font_grande, constantes.blue, 170, 270)
+            draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 170, 320)
+            draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 80, 370)
+            draw_text('PRESS RETUN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
             # actualizar high score
             if score > high_score:
                 high_score = score
@@ -350,7 +351,9 @@ while True:
                 enemigo_grupo.empty()
                 platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100, False)
                 platform_grupo.add(platform)
-            #if key[pygame.K_RETURN]:
+            # if key[pygame.K_RETURN]:
+            #     game_over = True
+
 
 
     for event in pygame.event.get():
