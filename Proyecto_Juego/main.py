@@ -8,8 +8,7 @@ from datetime import datetime
 from ajustes_imagen import ajustes_imagen
 from enemigo import Enemigo
 import menu
-import conexion
-import var
+
 
 # from juego import Juego
 #
@@ -255,7 +254,7 @@ platform_grupo.add(platform)
 #             reloj.tick(FPS)
 #             pygame.display.set_caption("Saltos")
 
-
+menu.Menu.main_menu()
 while True:
     reloj.tick(FPS)
     if game_over == False:
