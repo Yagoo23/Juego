@@ -7,6 +7,9 @@ from getpass import getuser
 from datetime import datetime
 from ajustes_imagen import ajustes_imagen
 from enemigo import Enemigo
+import menu
+import conexion
+import var
 
 # from juego import Juego
 #
@@ -132,6 +135,7 @@ class Jugador():
                         dy = 0
                         self.vel_y = -20
                         pygame.mixer.music.load('musica/salto.mp3')
+                        pygame.mixer.music.set_volume(0.6)
                         pygame.mixer.music.play(1, 0.0)
 
         # comprobar la colisión con el suelo
@@ -205,171 +209,126 @@ platform_grupo.add(platform)
 """ 
  el bucle principal del juego
 """
+menu.Menu.main_menu()
 
+def juego():
+    while True:
+        reloj.tick(FPS)
+        if game_over == False:
+            scroll = jumpy.movimiento()
+            fondo_scroll += scroll
+            if fondo_scroll >= 900:
+                fondo_scroll = 0
+            dibujar_fondo(fondo_scroll)
 
-# def main_menu():
-#     menu = True
-#     selected = "start"
-#     pygame.display.set_caption("Menú")
-#     while menu:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 quit()
-#             if event.type == pygame.KEYDOWN:
-#                 if event.key == pygame.K_UP:
-#                     selected = "start"
-#                 elif event.key == pygame.K_DOWN:
-#                     selected = "quit"
-#                 if event.key == pygame.K_RETURN:
-#                     if selected == "start":
-#                         print("Start")
-#
-#                     if selected == "quit":
-#                         pygame.quit()
-#                         quit()
-#
-#             # Main Menu UI
-#             screen.fill(constantes.blue)
-#             title = text_format("Saltos", constantes.font, 90, constantes.yellow)
-#             if selected == "start":
-#                 text_start = text_format("START", constantes.font, 75, constantes.white)
-#             else:
-#                 text_start = text_format("START", constantes.font, 75, constantes.black)
-#             if selected == "quit":
-#                 text_quit = text_format("QUIT", constantes.font, 75, constantes.white)
-#             else:
-#                 text_quit = text_format("QUIT", constantes.font, 75, constantes.black)
-#
-#             title_rect = title.get_rect()
-#             start_rect = text_start.get_rect()
-#             quit_rect = text_quit.get_rect()
-#             screen.blit(title, (constantes.SCREEN_WIDTH / 2 - (title_rect[2] / 2), 80))
-#             screen.blit(text_start, (constantes.SCREEN_WIDTH / 2 - (start_rect[2] / 2), 300))
-#             screen.blit(text_quit, (constantes.SCREEN_WIDTH / 2 - (quit_rect[2] / 2), 360))
-#             pygame.display.update()
-#             reloj.tick(FPS)
-#             pygame.display.set_caption("Saltos")
-
-
-while True:
-    reloj.tick(FPS)
-    if game_over == False:
-        scroll = jumpy.movimiento()
-        fondo_scroll += scroll
-        if fondo_scroll >= 900:
-            fondo_scroll = 0
-        dibujar_fondo(fondo_scroll)
-
-        # generar plataformas
-        if len(platform_grupo) < Max_Platforms:
-            p_w = random.randint(60, 90)
-            p_x = random.randint(5, constantes.SCREEN_WIDTH - p_w)
-            p_y = platform.rect.y - random.randint(60, 100)
-            p_tipo = random.randint(1, 2)
-            if p_tipo == 1 and score > 5000:
-                p_mover = True
-            else:
-                p_mover = False
-            platform = Platform(p_x, p_y, p_w, p_mover)
-            platform_grupo.add(platform)
-
-        # actualizar plataformas
-        platform_grupo.update(scroll)
-
-        # generar enemigos
-        if len(enemigo_grupo) == 0 and score > 2000:
-            enemigo = Enemigo(constantes.SCREEN_WIDTH, 100, avion_aj, 1.5)
-            enemigo_grupo.add(enemigo)
-        # update enemigos
-        enemigo_grupo.update(scroll, constantes.SCREEN_WIDTH)
-
-        # actualizar puntuación
-        if scroll > 0:
-            score += scroll
-
-        # dibujar la línea con la puntuación máxima previa
-        pygame.draw.line(screen, constantes.black, (0, score - high_score + SCROLL_TECHO),
-                         (constantes.SCREEN_WIDTH, score - high_score + SCROLL_TECHO), 3)
-        draw_text('HIGH SCORE', font_pequeña, constantes.black, constantes.SCREEN_WIDTH - 90,
-                  score - high_score + SCROLL_TECHO)
-        # dibuja
-        platform_grupo.draw(screen)
-        enemigo_grupo.draw(screen)
-        jumpy.dibujar()
-
-        # dibujar el panel
-        dibujar_panel()
-
-        # comprobar game over
-        if jumpy.rect.top > constantes.SCREEN_HEIGHT:
-            game_over = True
-            pygame.mixer.music.load('musica/Caida.mp3')
-            pygame.mixer.music.play(1, 0.0)
-        # comprobar la colisión con enemigos
-        if pygame.sprite.spritecollide(jumpy, enemigo_grupo, False):
-            if pygame.sprite.spritecollide(jumpy, enemigo_grupo, False, pygame.sprite.collide_mask):
-                game_over = True
-                pygame.mixer.music.load('musica/GameOver.mp3')
-                pygame.mixer.music.play(1, 0.0)
-    else:
-        if fade_counter < constantes.SCREEN_WIDTH:
-            fade_counter += 5
-            for y in range(0, 12, 2):
-                pygame.draw.rect(screen, constantes.black, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(screen, constantes.black,
-                                 (constantes.SCREEN_WIDTH - fade_counter, (y + 1) * 100, constantes.SCREEN_WIDTH,
-                                  100))
-        else:
-            draw_text('GAME OVER', font_grande, constantes.blue, 170, 270)
-            draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 170, 320)
-            draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 80, 370)
-            draw_text('PRESS RETUN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
-            # actualizar high score
-            if score > high_score:
-                high_score = score
-                with open('score.txt', 'w') as file:
-                    mensaje = mensaje = "Nuevo record: "
-                    mensaje = "Nuevo record: "
-                    usuario = getuser()
-                    espacio = ". Usario: "
-                    now = datetime.now()
-                    momento = now.strftime("%d/%m/%Y, %H:%M:%S")
-                    file.write(mensaje + str(high_score) + espacio + usuario + ". Hora y dia: " + str(momento))
-            key = pygame.key.get_pressed()
-            if key[pygame.K_SPACE]:
-                # resetea variables
-                game_over = False
-                score = 0
-                scroll = 0
-                fade_counter = 0
-                # reposicionar jumpy
-                jumpy.rect.center = (constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
-                # resetear plataformas
-                platform_grupo.empty()
-                # resetear enemigos
-                enemigo_grupo.empty()
-                platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100, False)
+            # generar plataformas
+            if len(platform_grupo) < Max_Platforms:
+                p_w = random.randint(60, 90)
+                p_x = random.randint(5, constantes.SCREEN_WIDTH - p_w)
+                p_y = platform.rect.y - random.randint(60, 100)
+                p_tipo = random.randint(1, 2)
+                if p_tipo == 1 and score > 5000:
+                    p_mover = True
+                else:
+                    p_mover = False
+                platform = Platform(p_x, p_y, p_w, p_mover)
                 platform_grupo.add(platform)
-            # if key[pygame.K_RETURN]:
-            #     game_over = True
 
+            # actualizar plataformas
+            platform_grupo.update(scroll)
 
+            # generar enemigos
+            if len(enemigo_grupo) == 0 and score > 2000:
+                enemigo = Enemigo(constantes.SCREEN_WIDTH, 100, avion_aj, 1.5)
+                enemigo_grupo.add(enemigo)
+            # update enemigos
+            enemigo_grupo.update(scroll, constantes.SCREEN_WIDTH)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            # actualizar puntuación máxima
-            if score > high_score:
-                high_score = score
-                with open('score.txt', 'w') as file:
-                    mensaje = "Nuevo record: "
-                    usuario = getuser()
-                    espacio = ". Usario: "
-                    now = datetime.now()
-                    momento = now.strftime("%d/%m/%Y, %H:%M:%S")
-                    file.write(mensaje + str(high_score) + espacio + usuario + ". Hora y dia: " + str(momento))
-            quit()
+            # actualizar puntuación
+            if scroll > 0:
+                score += scroll
 
-    pygame.display.update()
-# main_menu()
+            # dibujar la línea con la puntuación máxima previa
+            pygame.draw.line(screen, constantes.black, (0, score - high_score + SCROLL_TECHO),
+                             (constantes.SCREEN_WIDTH, score - high_score + SCROLL_TECHO), 3)
+            draw_text('HIGH SCORE', font_pequeña, constantes.black, constantes.SCREEN_WIDTH - 90,
+                      score - high_score + SCROLL_TECHO)
+            # dibuja
+            platform_grupo.draw(screen)
+            enemigo_grupo.draw(screen)
+            jumpy.dibujar()
+
+            # dibujar el panel
+            dibujar_panel()
+
+            # comprobar game over
+            if jumpy.rect.top > constantes.SCREEN_HEIGHT:
+                game_over = True
+                pygame.mixer.music.load('musica/Caida.mp3')
+                pygame.mixer.music.set_volume(0.6)
+                pygame.mixer.music.play(1, 0.0)
+            # comprobar la colisión con enemigos
+            if pygame.sprite.spritecollide(jumpy, enemigo_grupo, False):
+                if pygame.sprite.spritecollide(jumpy, enemigo_grupo, False, pygame.sprite.collide_mask):
+                    game_over = True
+                    pygame.mixer.music.load('musica/GameOver.mp3')
+                    pygame.mixer.music.set_volume(0.6)
+                    pygame.mixer.music.play(1, 0.0)
+        else:
+            if fade_counter < constantes.SCREEN_WIDTH:
+                fade_counter += 5
+                for y in range(0, 12, 2):
+                    pygame.draw.rect(screen, constantes.black, (0, y * 100, fade_counter, 100))
+                    pygame.draw.rect(screen, constantes.black,
+                                     (constantes.SCREEN_WIDTH - fade_counter, (y + 1) * 100, constantes.SCREEN_WIDTH,
+                                      100))
+            else:
+                draw_text('GAME OVER', font_grande, constantes.blue, 170, 270)
+                draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 170, 320)
+                draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 80, 370)
+                draw_text('PRESS RETUN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
+                # actualizar high score
+                if score > high_score:
+                    high_score = score
+                    with open('score.txt', 'w') as file:
+                        mensaje = mensaje = "Nuevo record: "
+                        mensaje = "Nuevo record: "
+                        usuario = getuser()
+                        espacio = ". Usario: "
+                        now = datetime.now()
+                        momento = now.strftime("%d/%m/%Y, %H:%M:%S")
+                        file.write(mensaje + str(high_score) + espacio + usuario + ". Hora y dia: " + str(momento))
+                key = pygame.key.get_pressed()
+                if key[pygame.K_SPACE]:
+                    # resetea variables
+                    game_over = False
+                    score = 0
+                    scroll = 0
+                    fade_counter = 0
+                    # reposicionar jumpy
+                    jumpy.rect.center = (constantes.SCREEN_WIDTH // 2, constantes.SCREEN_HEIGHT - 150)
+                    # resetear plataformas
+                    platform_grupo.empty()
+                    # resetear enemigos
+                    enemigo_grupo.empty()
+                    platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100, False)
+                    platform_grupo.add(platform)
+                # if key[pygame.K_RETURN]:
+                #     game_over = True
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                # actualizar puntuación máxima
+                if score > high_score:
+                    high_score = score
+                    with open('score.txt', 'w') as file:
+                        mensaje = "Nuevo record: "
+                        usuario = getuser()
+                        espacio = ". Usario: "
+                        now = datetime.now()
+                        momento = now.strftime("%d/%m/%Y, %H:%M:%S")
+                        file.write(mensaje + str(high_score) + espacio + usuario + ". Hora y dia: " + str(momento))
+                quit()
+
+        pygame.display.update()
