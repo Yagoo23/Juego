@@ -120,8 +120,10 @@ class Jugador():
         # asegurarse que no se sale de la pantalla
         if self.rect.left + dx < 0:
             dx = 0 - self.rect.left
+            self.rect.left=constantes.SCREEN_WIDTH-self.rect.right
         if self.rect.right + dx > constantes.SCREEN_WIDTH:
             dx = constantes.SCREEN_WIDTH - self.rect.right
+            self.rect.right=0
 
         # comprobar la colisión con las plataformas
         for platform in platform_grupo:
@@ -254,7 +256,6 @@ platform_grupo.add(platform)
 #             reloj.tick(FPS)
 #             pygame.display.set_caption("Saltos")
 
-menu.Menu.main_menu()
 while True:
     reloj.tick(FPS)
     if game_over == False:
@@ -327,7 +328,7 @@ while True:
             draw_text('GAME OVER', font_grande, constantes.blue, 170, 270)
             draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 170, 320)
             draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 80, 370)
-            draw_text('PRESS RETUN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
+            draw_text('PRESS RETURN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
             # actualizar high score
             if score > high_score:
                 high_score = score
@@ -375,4 +376,3 @@ while True:
             quit()
 
     pygame.display.update()
-# main_menu()

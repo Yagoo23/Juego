@@ -2,11 +2,10 @@ import pygame
 import constantes
 
 
-
-
 screen = pygame.display.set_mode((constantes.SCREEN_WIDTH, constantes.SCREEN_HEIGHT))
 reloj = pygame.time.Clock()
 FPS = 60
+
 
 def text_format(message, textFont, textSize, textColor):
     newFont = pygame.font.Font(textFont, textSize)
@@ -16,6 +15,7 @@ def text_format(message, textFont, textSize, textColor):
 
 
 class Menu():
+    selected = ""
     def main_menu():
         menu = True
         selected = "start"
