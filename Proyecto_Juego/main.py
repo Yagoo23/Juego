@@ -119,11 +119,9 @@ class Jugador():
 
         # asegurarse que no se sale de la pantalla
         if self.rect.left + dx < 0:
-            dx = 0 - self.rect.left
-            self.rect.left=constantes.SCREEN_WIDTH-self.rect.right
+            dx = constantes.SCREEN_WIDTH-self.rect.right
         if self.rect.right + dx > constantes.SCREEN_WIDTH:
-            dx = constantes.SCREEN_WIDTH - self.rect.right
-            self.rect.right=0
+            self.rect.left = dx
 
         # comprobar la colisión con las plataformas
         for platform in platform_grupo:
