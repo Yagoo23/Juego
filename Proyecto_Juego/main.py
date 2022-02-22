@@ -1,4 +1,6 @@
 import pygame
+from PyQt5 import QtSql
+
 import constantes
 import random
 import os
@@ -7,15 +9,9 @@ from getpass import getuser
 from datetime import datetime
 from ajustes_imagen import ajustes_imagen
 from enemigo import Enemigo
-import menu
 import conexion
+import var
 
-# from juego import Juego
-#
-# j=Juego()
-# while j.running:
-#     j.playing=True
-#     j.loop_juego()
 
 # https://www.youtube.com/watch?v=UTn8VWkIqbo&list=PLjcN1EyupaQlBSrfP4_9SdpJIcfnSJgzL&index=15 ejecutable empezar
 mixer.init()
@@ -48,7 +44,6 @@ if os.path.exists('score.txt'):
         high_score = int(score)
 else:
     high_score = 0
-
 
 """
 Definir fuente
@@ -119,7 +114,7 @@ class Jugador():
 
         # asegurarse que no se sale de la pantalla
         if self.rect.left + dx < 0:
-            dx = constantes.SCREEN_WIDTH-self.rect.right
+            dx = constantes.SCREEN_WIDTH - self.rect.right
         if self.rect.right + dx > constantes.SCREEN_WIDTH:
             self.rect.left = dx
 
@@ -221,7 +216,7 @@ while True:
             p_x = random.randint(5, constantes.SCREEN_WIDTH - p_w)
             p_y = platform.rect.y - random.randint(60, 100)
             p_tipo = random.randint(1, 2)
-            if p_tipo == 1 and score > 5000:
+            if p_tipo == 1 and score > 2000:
                 p_mover = True
             else:
                 p_mover = False
@@ -232,7 +227,7 @@ while True:
         platform_grupo.update(scroll)
 
         # generar enemigos
-        if len(enemigo_grupo) == 0 and score > 2000:
+        if len(enemigo_grupo) == 0 and score > 5000:
             enemigo = Enemigo(constantes.SCREEN_WIDTH, 100, avion_aj, 1.5)
             enemigo_grupo.add(enemigo)
         # update enemigos
@@ -275,22 +270,31 @@ while True:
                                  (constantes.SCREEN_WIDTH - fade_counter, (y + 1) * 100, constantes.SCREEN_WIDTH,
                                   100))
         else:
-            draw_text('GAME OVER', font_grande, constantes.blue, 170, 270)
-            draw_text('SCORE: ' + str(score), font_grande, constantes.blue, 170, 320)
-            draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.blue, 80, 370)
-            draw_text('PRESS RETURN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
+            draw_text('GAME OVER', font_grande, constantes.white, 170, 270)
+            draw_text('SCORE: ' + str(score), font_grande, constantes.white, 170, 320)
+            draw_text('PRESS SPACE TO PLAY AGAIN', font_grande, constantes.white, 80, 370)
             # actualizar high score
             if score > high_score:
-                newScore = []
                 high_score = score
                 with open('score.txt', 'w') as file:
-                    conexion.Conexion.db_connect(newScore)
+                    newScore = []
+                    conexion.Conexion.db_connect(var.filedb)
                     mensaje = "Nuevo record: "
                     usuario = getuser()
                     espacio = ". Usario: "
                     now = datetime.now()
                     momento = now.strftime("%d/%m/%Y, %H:%M:%S")
                     file.write(mensaje + str(high_score) + espacio + usuario + ". Hora y dia: " + str(momento))
+                    #conexion.Conexion.high_score(newScore)
+                    query = QtSql.QSqlQuery()
+                    query.prepare('insert into record(high_score,user,date) VALUES(:high_score,:user,:date)')
+                    query.bindValue(':high_score', str(high_score))
+                    query.bindValue(':user', str(usuario))
+                    query.bindValue(':date', str(momento))
+                    if query.exec():
+                        print('Inserción correcta')
+                    else:
+                        print('Error')
 
             key = pygame.key.get_pressed()
             if key[pygame.K_SPACE]:
@@ -309,8 +313,6 @@ while True:
                 platform_grupo.add(platform)
             # if key[pygame.K_RETURN]:
             #     game_over = True
-
-
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
