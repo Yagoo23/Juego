@@ -8,7 +8,7 @@ from datetime import datetime
 from ajustes_imagen import ajustes_imagen
 from enemigo import Enemigo
 import menu
-
+import conexion
 
 # from juego import Juego
 #
@@ -45,10 +45,10 @@ fade_counter = 0
 
 if os.path.exists('score.txt'):
     with open('score.txt', 'r') as file:
-        high_score = int(file.seek(1))
+        high_score = int(score)
 else:
     high_score = 0
-# high_score=0
+
 
 """
 Definir fuente
@@ -205,54 +205,6 @@ enemigo_grupo = pygame.sprite.Group()
 platform = Platform(constantes.SCREEN_WIDTH // 2 - 50, constantes.SCREEN_HEIGHT - 50, 100, False)
 platform_grupo.add(platform)
 
-""" 
- el bucle principal del juego
-"""
-
-
-# def main_menu():
-#     menu = True
-#     selected = "start"
-#     pygame.display.set_caption("Menú")
-#     while menu:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 quit()
-#             if event.type == pygame.KEYDOWN:
-#                 if event.key == pygame.K_UP:
-#                     selected = "start"
-#                 elif event.key == pygame.K_DOWN:
-#                     selected = "quit"
-#                 if event.key == pygame.K_RETURN:
-#                     if selected == "start":
-#                         print("Start")
-#
-#                     if selected == "quit":
-#                         pygame.quit()
-#                         quit()
-#
-#             # Main Menu UI
-#             screen.fill(constantes.blue)
-#             title = text_format("Saltos", constantes.font, 90, constantes.yellow)
-#             if selected == "start":
-#                 text_start = text_format("START", constantes.font, 75, constantes.white)
-#             else:
-#                 text_start = text_format("START", constantes.font, 75, constantes.black)
-#             if selected == "quit":
-#                 text_quit = text_format("QUIT", constantes.font, 75, constantes.white)
-#             else:
-#                 text_quit = text_format("QUIT", constantes.font, 75, constantes.black)
-#
-#             title_rect = title.get_rect()
-#             start_rect = text_start.get_rect()
-#             quit_rect = text_quit.get_rect()
-#             screen.blit(title, (constantes.SCREEN_WIDTH / 2 - (title_rect[2] / 2), 80))
-#             screen.blit(text_start, (constantes.SCREEN_WIDTH / 2 - (start_rect[2] / 2), 300))
-#             screen.blit(text_quit, (constantes.SCREEN_WIDTH / 2 - (quit_rect[2] / 2), 360))
-#             pygame.display.update()
-#             reloj.tick(FPS)
-#             pygame.display.set_caption("Saltos")
 
 while True:
     reloj.tick(FPS)
@@ -329,15 +281,17 @@ while True:
             draw_text('PRESS RETURN TO SEE HIGH SCORE', font_grande, constantes.blue, 70, 420)
             # actualizar high score
             if score > high_score:
+                newScore = []
                 high_score = score
                 with open('score.txt', 'w') as file:
-                    mensaje = mensaje = "Nuevo record: "
+                    conexion.Conexion.db_connect(newScore)
                     mensaje = "Nuevo record: "
                     usuario = getuser()
                     espacio = ". Usario: "
                     now = datetime.now()
                     momento = now.strftime("%d/%m/%Y, %H:%M:%S")
                     file.write(mensaje + str(high_score) + espacio + usuario + ". Hora y dia: " + str(momento))
+
             key = pygame.key.get_pressed()
             if key[pygame.K_SPACE]:
                 # resetea variables
